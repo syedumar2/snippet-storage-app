@@ -267,6 +267,7 @@ app.put('/update/:id', authToken, async (req, res) => {
                 filename: filename || undefined, // Prevent overwriting with empty string
                 content: content || undefined // Prevent overwriting with empty string
         }});
+        console.log(file);
 
         if (!file) {
             return res.status(404).send("File not found or does not belong to user");

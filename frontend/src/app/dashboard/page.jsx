@@ -3,14 +3,9 @@ import { Input } from "@/components/ui/input"
 
 import Header from "@/components/Header";
 import { useAuth } from "@/components/hooks/use-auth"
-import { Button } from "@/components/ui/button";
+
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from "react";
-
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { TriangleAlert } from 'lucide-react'
-import { Textarea } from "@/components/ui/textarea"
-import { Trash2, NotebookPen } from 'lucide-react'
 
 import {
     Dialog,
@@ -21,9 +16,25 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { TriangleAlert } from 'lucide-react'
+import { Textarea } from "@/components/ui/textarea"
+import { Trash2, NotebookPen } from 'lucide-react'
+
+
+
 
 import Image from 'next/image';
-import SnippetCard from "@/components/SnippetCard";
+
 
 const DashboardPage = () => {
     const router = useRouter();
@@ -44,6 +55,7 @@ const DashboardPage = () => {
     const [isEditDialogOpen,setIsEditDialogOpen] = useState(false);
     const [editDialogError,setIsEditDialogError] = useState('');
     const [isAnimating, setIsAnimating] = useState(false);
+    const [editFileId, setEditFileId] = useState(null); // New state to track which file is being edited
 
 
     const dialogState = {
@@ -130,10 +142,18 @@ const DashboardPage = () => {
         logout();
         router.push('/login')
     };
-    const openEditDialog =(existingTitle,existingContent) =>{
+    const openEditDialog =(fileId,existingTitle,existingContent) =>{
+        setEditFileId(fileId); // Set the specific file ID being edited
         setFilename(existingTitle);
-        setContent(existingContent);
+        setContent(existingContent);    
         setIsEditDialogOpen(true)
+    }
+    const resetForm = () => {
+        setFilename('');
+        setContent('');
+        setEditFileId(null);
+        setIsEditDialogError('');
+        setDialogError('');
     }
 
     async function handleSubmit(e) {
@@ -212,9 +232,10 @@ const DashboardPage = () => {
 
     }
     async function handleUpdate(id) {
+        if (!editFileId) return; // Ensure we have a file ID to update
         setIsLoading(true);
         try{
-            const response = await fetch(`http://localhost:3001/update/${id}`,
+            const response = await fetch(`http://localhost:3001/update/${editFileId}`,
                 {
                     method: 'PUT',
                     headers:{
@@ -317,16 +338,89 @@ const DashboardPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-5">
                     {loading ?(<p className="text-gray-500">Loading...</p>): files.length > 0 ? (
                         files.map((file) => (
-                            <SnippetCard file={file} 
-                            key = {file.id}
-                            content = {file.content}
-                            isAnimating={isAnimating} 
-                            dialogState={dialogState} 
-                            handleDelete={handleDelete} 
-                            openEditDialog={openEditDialog} 
-                            handleUpdate={handleUpdate} 
-                            isLoading={isLoading} 
-                            />
+                            <Card key={file.id} className={`border-gray-300 shadow-lg animate-fade-left ${isAnimating ? "animate-duration-1000 animate-delay-[800ms] animate-ease-out animate-normal" : ""}`}>
+            <CardHeader>
+                <CardTitle>{file.filename}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p>{file.content}</p>
+            </CardContent>
+            {/* ---------------------------------------------------------- delete button DIalogue trigger here---------------------------------------------------------------- */}
+
+            <div className="flex items-center justify-end mr-5 gap-3 ">
+                <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                    <DialogTrigger asChild>
+
+                        <Button
+                            className="bg-black hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+
+                        >
+                            <Trash2 className="w-5 h-5" />
+                        </Button>
+                    </DialogTrigger>
+
+
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Are you absolutely sure?</DialogTitle>
+                            <DialogDescription>
+                                This action cannot be undone. This will permanently delete your snippet
+                                and its content from our servers.
+                            </DialogDescription>
+                            <div className="flex items-center justify-between gap-2 mt-3">
+                                <Button variant="outline" className="cursor-pointer" onClick={() => setIsDeleteDialogOpen(false)} >Cancel</Button>
+                                <Button className="cursor-pointer bg-red-600 hover:bg-red-900" onClick={() => handleDelete(file.id)}>{isLoading ? "Deleting..." : "Delete"}</Button>
+                            </div>
+
+                        </DialogHeader>
+                    </DialogContent>
+                </Dialog>
+
+                <div>
+                    {/* -------------------------------------------------------------edit button------------------------------------------------------------------------------- */}
+                    <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button
+                                                className="bg-black hover:bg-green-400 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                                                onClick={() => openEditDialog(file.id, file.filename, file.content)}
+                                            >
+                                                <NotebookPen className="w-5 h-5" />
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                {editDialogError && (
+                                                    <Alert variant="destructive">
+                                                        <TriangleAlert />
+                                                        <AlertDescription>{editDialogError}</AlertDescription>
+                                                    </Alert>
+                                                )}
+                                                <DialogTitle>Edit Code Snippet</DialogTitle>
+                                                <DialogDescription>
+                                                    Enter your Title and Content in the following fields below:
+                                                </DialogDescription>
+                                                <div className="flex flex-col gap-2 text-muted-foreground text-sm">
+                                                    <Label htmlFor="filename">Snippet title:</Label>
+                                                    <Input type="text" placeholder="Title" value={filename} onChange={(e) => setFilename(e.target.value)} />
+                                                    <Label htmlFor="content">Content:</Label>
+                                                    <Textarea placeholder="Type your message here." value={content} onChange={(e) => setContent(e.target.value)} />
+                                                    <div className="flex items-center justify-between gap-2 mt-0.5">
+                                                        <Button variant="outline" onClick={() => {setIsEditDialogOpen(false); resetForm();}}>Cancel</Button>
+                                                        <Button onClick={handleUpdate}>
+                                                            {isLoading ? "Applying Edits..." : "Edit"}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </DialogHeader>
+                                        </DialogContent>
+                                    </Dialog>
+                </div>
+            </div>
+
+
+            {/* ----------------------------------------------------------DIalogue end trigger here---------------------------------------------------------------- */}
+
+        </Card>
                         ))
                     ) : (<p className="text-gray-500">Files not found</p>)}
                 </div>
