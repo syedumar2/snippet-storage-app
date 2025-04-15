@@ -272,6 +272,8 @@ const DashboardPage = () => {
         
     }
 
+    //pagination parameters 
+
     const lastPostIndex = currentPage*postsPerPage;
     const firstPostIndex = lastPostIndex - postsPerPage;
     const totalPages = Math.ceil(files.length/postsPerPage);  
@@ -285,7 +287,7 @@ const DashboardPage = () => {
             {dashboardError && <div className="text-red-500">Error: {dashboardError}</div>}
 
             {/* Header */}
-        <Header user={user} handleLogout={handleDelete}/>
+        <Header user={user} handleLogout={handleLogout}/>
             
 
             {/* Main content */}
@@ -353,7 +355,7 @@ const DashboardPage = () => {
                         files.slice(firstPostIndex,lastPostIndex).map((file) => (
                         <Card key={file.id} className={`border-gray-300 shadow-lg animate-fade-left ${isAnimating ? "animate-duration-1000 animate-delay-[400ms] animate-ease-out animate-normal" : ""}`}>
                             <CardHeader>
-                                <CardTitle>{file.filename}</CardTitle>
+                                <CardTitle onClick={()=>router.push(`/view/${file.id}`)} className={"hover:cursor-pointer"}>{file.filename}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <p>{file.content}</p>
@@ -441,9 +443,9 @@ const DashboardPage = () => {
                     {
                         files.length>postsPerPage &&
                         <div className="flex justify-center items-center gap-3">
-                            <Button onClick={prevPage} disabled={currentPage === 1}>Previous</Button>
+                            <Button className={"hover:cursor-pointer"}  onClick={prevPage} disabled={currentPage === 1}>Previous</Button>
                             <Pagination totalPages={totalPages} setCurrentPage={setCurrentPage}/>
-                            <Button onClick={nextPage} disabled={currentPage === lastPage}>Next</Button>
+                            <Button  className={"hover:cursor-pointer"} onClick={nextPage} disabled={currentPage === lastPage}>Next</Button>
                             
                         </div>
                     }

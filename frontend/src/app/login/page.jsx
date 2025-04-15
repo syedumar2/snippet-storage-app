@@ -50,7 +50,7 @@ export default function LoginPage() {
                 }),
             });
             if (!response.ok) {
-                const errData = response.text();
+                const errorData = response.text();
                 throw new Error(errorData || "Wrong Credentials")
             }
             alert("Log in successful")
