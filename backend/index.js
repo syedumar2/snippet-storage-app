@@ -59,7 +59,7 @@ app.post("/signup" ,async (req, res) => {  //returns a JWT token if authenticati
     if (existinguser) {
         return res.status(400).send("user already exists");
       }
-    const hashedPassword = await bcrypt.hash(password,SALT_ROUNDS);
+    else {const hashedPassword = await bcrypt.hash(password,SALT_ROUNDS);
     
     const user = await prisma.user.create({
         data:{ //data is a method name
@@ -67,7 +67,7 @@ app.post("/signup" ,async (req, res) => {  //returns a JWT token if authenticati
             password : hashedPassword,
         },
     });
-    res.status(201).json({msg:"User Created",user});
+    res.status(201).json({msg:"User Created",user});}
 
     
 });
