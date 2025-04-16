@@ -82,10 +82,13 @@ app.post("/login", async (req, res) => {
                 username,
             },
         });
-
+        
+        if (!user) {
+            res.status(401).send("Invalid Credentials");
+        }
         const pswrd = await bcrypt.compare(password, user.password);
 
-        if (!user || !pswrd) {
+        if (!pswrd) {
             res.status(401).send("Invalid Credentials");
         }
         const token = jwt.sign({ username }, SECRET_KEY, {

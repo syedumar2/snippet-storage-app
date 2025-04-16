@@ -39,6 +39,7 @@ export default function LoginPage() {
         }
         setIsLoading(true)
         try {
+            
             const response = await fetch('http://localhost:3001/login', {
                 method: 'POST',
                 headers: {
