@@ -32,7 +32,7 @@ export function AuthProvider({children}){
     };
     const logout = () => {
         localStorage.removeItem('auth_token')
-        
+        setToken(null); 
         router.refresh();
     }
     if (!isLoaded) {
@@ -43,7 +43,7 @@ export function AuthProvider({children}){
             token,
             login,
             logout,
-            isAuthenticated: token ? true:false,
+            isAuthenticated: !!token,
         }}>
             {children}
         </AuthContext.Provider>

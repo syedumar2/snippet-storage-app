@@ -29,6 +29,7 @@ export default function LoginPage() {
     const router = useRouter()
     const { login, token } = useAuth();
 
+    
 
     async function handleSubmit(e) {
         e.preventDefault()
@@ -51,7 +52,7 @@ export default function LoginPage() {
                 }),
             });
             if (!response.ok) {
-                const errorData = response.text();
+                const errorData = await response.text();
                 throw new Error(errorData || "Wrong Credentials")
             }
             alert("Log in successful")

@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Copy } from "lucide-react";
 import { Check } from "lucide-react";
 import { Share } from "lucide-react";
+import { RWebShare } from "react-web-share";
 
 const ViewFile = () => {
   const router = useRouter();
@@ -126,26 +127,41 @@ const ViewFile = () => {
                 Back
               </Button>
               <div className="flex gap-2">
-                  <Button
-                    className="hover:cursor-pointer"
-                    onClick={() => {
-                      copyText(file.content);
-                      toast.success("Content Copied to clipboard");
-                    }}
-                  >
-                    {" "}
-                    {isCopied ? <Check /> : <Copy />}
+                <Button
+                  className="hover:cursor-pointer"
+                  onClick={() => {
+                    copyText(file.content);
+                    toast.success("Content Copied to clipboard");
+                  }}
+                >
+                  {" "}
+                  {isCopied ? <Check /> : <Copy />}
+                </Button>
+                <Button
+                  className="hover:cursor-pointer"
+                  onClick={() => {
+                    copyURL(location.href);
+                    toast.success("Link copied");
+                  }}
+                >
+                  {" "}
+                  {isShared ? <Check /> : <Share />}
+                </Button>
+                <div>
+                  <Button className="hover:cursor-pointer">
+                    <RWebShare
+                  
+                      data={{
+                        text: file.content,
+                        url: location.href,
+                        title: file.filename,
+                      }}
+                      onClick={() => console.log("shared successfully!")}
+                    >
+                      <button   className="hover:cursor-pointer">Share 🔗</button>
+                    </RWebShare>
                   </Button>
-                  <Button
-                    className="hover:cursor-pointer"
-                    onClick={() => {
-                      copyURL(location.href);
-                      toast.success("Link copied");
-                    }}
-                  >
-                    {" "}
-                    {isShared ? <Check /> : <Share />}
-                  </Button>
+                </div>
               </div>
             </CardFooter>
           </Card>
